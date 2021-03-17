@@ -24,3 +24,12 @@ As part of this process however, you should look to refactor some of the code in
 Once you have completed test, zip up your solution, excluding any build artifacts to reduce the size, and email it back to our recruitment team.
 
 Good luck!
+
+Refactor Notes - Davian Robinson:
+
+- Updated the Domain Account Class and User Class 
+- Updated The Namespaces to reflect the Class Location 
+- Transfer money Credit and debit need to occur as transaction so created new repository iterface to handle this 
+- Add the body of withdraw method 
+- added test for both Transfer money and Withdraw method
+- Change decimal type to money type , as the domain is all about money it should be treated as a class to handle currencies , decimal rounding and future currecy conversions in one place 
