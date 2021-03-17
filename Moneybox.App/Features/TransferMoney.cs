@@ -1,6 +1,7 @@
 ﻿using Moneybox.App.DataAccess;
 using Moneybox.App.Domain;
 using Moneybox.App.Domain.Services;
+using NodaMoney;
 using System;
 
 namespace Moneybox.App.Features
@@ -18,13 +19,13 @@ namespace Moneybox.App.Features
             this.transferMoneyRepository = transferRepository;
         }
 
-        public void Execute(Guid fromAccountId, Guid toAccountId, decimal amount)
+        public void Execute(Guid fromAccountId, Guid toAccountId, Money amount)
         {
             var from = this.accountRepository.GetAccountById(fromAccountId);
             var to = this.accountRepository.GetAccountById(toAccountId);
 
             var fromBalance = from.Balance - amount;
-            if (fromBalance < 0m)
+            if (fromBalance < new Money(0m, Currency.FromCode(Account.DefaultCurrencyCode)))
             {
                 throw new InvalidOperationException("Insufficient funds to make transfer");
             }
@@ -40,7 +41,7 @@ namespace Moneybox.App.Features
                 throw new InvalidOperationException("Account pay in limit reached");
             }
 
-            if (Account.PayInLimit - paidIn < 500m)
+            if (Account.PayInLimit - paidIn < new Money(500m, Currency.FromCode(Account.DefaultCurrencyCode)))
             {
                 this.notificationService.NotifyApproachingPayInLimit(to.User.Email);
             }

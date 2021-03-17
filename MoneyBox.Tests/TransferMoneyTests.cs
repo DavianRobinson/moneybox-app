@@ -4,6 +4,7 @@ using Moneybox.App.Domain;
 using Moneybox.App.Domain.Services;
 using Moneybox.App.Features;
 using Moq;
+using NodaMoney;
 using Xunit;
 
 namespace Moneybox.Tests
@@ -25,10 +26,10 @@ namespace Moneybox.Tests
             //arrange
 
             var fromAccount = new Account(fromUser);
-            fromAccount.Credit(1000m);
+            fromAccount.Credit(new Money(1000m, Currency.FromCode(Account.DefaultCurrencyCode)));
 
             var toAccount = new Account(toUser);
-            toAccount.Credit(1000m);
+            toAccount.Credit(new Money(1000m, Currency.FromCode(Account.DefaultCurrencyCode)));
 
 
 
@@ -44,11 +45,11 @@ namespace Moneybox.Tests
 
 
             //act
-            sut.Execute(fromAccount.Id, toAccount.Id, 10m);
+            sut.Execute(fromAccount.Id, toAccount.Id, new Money(10m, Currency.FromCode(Account.DefaultCurrencyCode)));
 
             //assert
-            Assert.Equal(990m, fromAccount.Balance);
-            Assert.Equal(1010m, toAccount.Balance);
+            Assert.Equal(new Money(990m, Currency.FromCode(Account.DefaultCurrencyCode)), fromAccount.Balance);
+            Assert.Equal(new Money(1010m, Currency.FromCode(Account.DefaultCurrencyCode)), toAccount.Balance);
         }
 
         [Fact]
@@ -57,12 +58,12 @@ namespace Moneybox.Tests
             //arrange
 
             var fromAccount = new Account(fromUser);
-            fromAccount.Credit(5m);
+            fromAccount.Credit(new Money(5m, Currency.FromCode(Account.DefaultCurrencyCode)));
 
 
 
             var toAccount = new Account(toUser);
-            toAccount.Credit(1000m);
+            toAccount.Credit(new Money(1000m, Currency.FromCode(Account.DefaultCurrencyCode)));
 
 
             var accountRepo = new Mock<IAccountRepository>();
@@ -78,9 +79,9 @@ namespace Moneybox.Tests
 
 
             //assert
-            Assert.Throws<InvalidOperationException>(() => sut.Execute(fromAccount.Id, toAccount.Id, 10m));
-            Assert.Equal(5m, fromAccount.Balance);
-            Assert.Equal(1000m, toAccount.Balance);
+            Assert.Throws<InvalidOperationException>(() => sut.Execute(fromAccount.Id, toAccount.Id, new Money(10m, Currency.FromCode(Account.DefaultCurrencyCode))));
+            Assert.Equal(new Money(5m, Currency.FromCode(Account.DefaultCurrencyCode)), fromAccount.Balance);
+            Assert.Equal(new Money(1000m, Currency.FromCode(Account.DefaultCurrencyCode)), toAccount.Balance);
         }
 
         [Fact]
@@ -89,10 +90,10 @@ namespace Moneybox.Tests
             //arrange
 
             var fromAccount = new Account(fromUser);
-            fromAccount.Credit(400m);
+            fromAccount.Credit(new Money(400m, Currency.FromCode(Account.DefaultCurrencyCode)));
 
             var toAccount = new Account(toUser);
-            toAccount.Credit(1000m);
+            toAccount.Credit(new Money(1000m, Currency.FromCode(Account.DefaultCurrencyCode)));
 
 
             var accountRepo = new Mock<IAccountRepository>();
@@ -105,13 +106,13 @@ namespace Moneybox.Tests
 
 
             //act
-            sut.Execute(fromAccount.Id, toAccount.Id, 10m);
+            sut.Execute(fromAccount.Id, toAccount.Id, new Money(10m, Currency.FromCode(Account.DefaultCurrencyCode)));
 
 
             //assert
             notificationService.Verify(x => x.NotifyFundsLow(fromUser.Email));
-            Assert.Equal(390m, fromAccount.Balance);
-            Assert.Equal(1010m, toAccount.Balance);
+            Assert.Equal(new Money(390m, Currency.FromCode(Account.DefaultCurrencyCode)), fromAccount.Balance);
+            Assert.Equal(new Money(1010m, Currency.FromCode(Account.DefaultCurrencyCode)), toAccount.Balance);
         }
         [Fact]
         public void TransferMoneyOverPaidinLimit()
@@ -119,10 +120,10 @@ namespace Moneybox.Tests
             //arrange
 
             var fromAccount = new Account(fromUser);
-            fromAccount.Credit(1000m);
+            fromAccount.Credit(new Money(1000m, Currency.FromCode(Account.DefaultCurrencyCode)));
 
             var toAccount = new Account(toUser);
-            toAccount.Credit(3995m);
+            toAccount.Credit(new Money(3995m, Currency.FromCode(Account.DefaultCurrencyCode)));
 
 
             var accountRepo = new Mock<IAccountRepository>();
@@ -137,9 +138,9 @@ namespace Moneybox.Tests
 
 
             //assert
-            Assert.Throws<InvalidOperationException>(() => sut.Execute(fromAccount.Id, toAccount.Id, 10m));
-            Assert.Equal(1000m, fromAccount.Balance);
-            Assert.Equal(3995m, toAccount.Balance);
+            Assert.Throws<InvalidOperationException>(() => sut.Execute(fromAccount.Id, toAccount.Id, new Money(10m, Currency.FromCode(Account.DefaultCurrencyCode))));
+            Assert.Equal(new Money(1000m, Currency.FromCode(Account.DefaultCurrencyCode)), fromAccount.Balance);
+            Assert.Equal(new Money(3995m, Currency.FromCode(Account.DefaultCurrencyCode)), toAccount.Balance);
 
         }
 
@@ -150,11 +151,11 @@ namespace Moneybox.Tests
 
 
             var fromAccount = new Account(fromUser);
-            fromAccount.Credit(400m);
+            fromAccount.Credit(new Money(400m, Currency.FromCode(Account.DefaultCurrencyCode)));
 
 
             var toAccount = new Account(toUser);
-            toAccount.Credit(3600m);
+            toAccount.Credit(new Money(3600m, Currency.FromCode(Account.DefaultCurrencyCode)));
 
             var accountRepo = new Mock<IAccountRepository>();
             accountRepo.Setup(x => x.GetAccountById(fromAccount.Id)).Returns(fromAccount);
@@ -166,13 +167,13 @@ namespace Moneybox.Tests
 
 
             //act
-            sut.Execute(fromAccount.Id, toAccount.Id, 10m);
+            sut.Execute(fromAccount.Id, toAccount.Id, new Money(10m, Currency.FromCode(Account.DefaultCurrencyCode)));
 
 
             //assert
             notificationService.Verify(x => x.NotifyApproachingPayInLimit(toUser.Email));
-            Assert.Equal(390m, fromAccount.Balance);
-            Assert.Equal(3610m, toAccount.Balance);
+            Assert.Equal(new Money(390m, Currency.FromCode(Account.DefaultCurrencyCode)), fromAccount.Balance);
+            Assert.Equal(new Money(3610m, Currency.FromCode(Account.DefaultCurrencyCode)), toAccount.Balance);
 
         }
     }

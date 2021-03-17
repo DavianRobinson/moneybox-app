@@ -5,6 +5,7 @@ using Moneybox.App.Features;
 using Moneybox.App.DataAccess;
 using Moq;
 using Moneybox.App.Domain.Services;
+using NodaMoney;
 
 namespace Moneybox.Tests
 {
@@ -23,7 +24,7 @@ namespace Moneybox.Tests
             //arrange
 
             var TestAccount = new Account(user);
-            TestAccount.Credit(1000m);
+            TestAccount.Credit(new Money(1000m, Currency.FromCode(Account.DefaultCurrencyCode)));
 
             var accountRepo = new Mock<IAccountRepository>();
             accountRepo.Setup(x => x.GetAccountById(TestAccount.Id)).Returns(TestAccount);
@@ -34,10 +35,10 @@ namespace Moneybox.Tests
 
 
             //act
-            sut.Execute(TestAccount.Id, 10m);
+            sut.Execute(TestAccount.Id, new Money(10m, Currency.FromCode(Account.DefaultCurrencyCode)));
 
             //assert
-            Assert.Equal(990m, TestAccount.Balance);
+            Assert.Equal(new Money(990m, Currency.FromCode(Account.DefaultCurrencyCode)), TestAccount.Balance);
         }
         [Fact]
         public void WithdrawMoneyZeroBalance()
@@ -45,7 +46,7 @@ namespace Moneybox.Tests
             //arrange
 
             var TestAccount = new Account(user);
-            TestAccount.Credit(0m);
+            TestAccount.Credit(new Money(0m, Currency.FromCode(Account.DefaultCurrencyCode)));
 
             var accountRepo = new Mock<IAccountRepository>();
             accountRepo.Setup(x => x.GetAccountById(TestAccount.Id)).Returns(TestAccount);
@@ -54,7 +55,7 @@ namespace Moneybox.Tests
             var sut = new WithdrawMoney(accountRepo.Object, notificationService.Object);
             //act
             //assert
-            Assert.Throws<InvalidOperationException>(() => sut.Execute(TestAccount.Id, 10m));
+            Assert.Throws<InvalidOperationException>(() => sut.Execute(TestAccount.Id, new Money(10m, Currency.FromCode(Account.DefaultCurrencyCode))));
 
         }
         [Fact]
@@ -63,7 +64,7 @@ namespace Moneybox.Tests
             //arrange
 
             var TestAccount = new Account(user);
-            TestAccount.Credit(5m);
+            TestAccount.Credit(new Money(5m, Currency.FromCode(Account.DefaultCurrencyCode)));
 
             var accountRepo = new Mock<IAccountRepository>();
             accountRepo.Setup(x => x.GetAccountById(TestAccount.Id)).Returns(TestAccount);
@@ -73,7 +74,7 @@ namespace Moneybox.Tests
 
             //act
             //assert
-            Assert.Throws<InvalidOperationException>(() => sut.Execute(TestAccount.Id, 10m));
+            Assert.Throws<InvalidOperationException>(() => sut.Execute(TestAccount.Id, new Money(10m, Currency.FromCode(Account.DefaultCurrencyCode))));
         }
 
         [Fact]
@@ -82,7 +83,7 @@ namespace Moneybox.Tests
             //arrange
 
             var TestAccount = new Account(user);
-            TestAccount.Credit(500m);
+            TestAccount.Credit(new Money(500m, Currency.FromCode(Account.DefaultCurrencyCode)));
 
             var accountRepo = new Mock<IAccountRepository>();
             accountRepo.Setup(x => x.GetAccountById(TestAccount.Id)).Returns(TestAccount);
@@ -91,7 +92,7 @@ namespace Moneybox.Tests
             var sut = new WithdrawMoney(accountRepo.Object, notificationService.Object);
 
             //act
-            sut.Execute(TestAccount.Id, 10m);
+            sut.Execute(TestAccount.Id, new Money(10m, Currency.FromCode(Account.DefaultCurrencyCode)));
 
             //assert
             notificationService.Verify(x => x.NotifyFundsLow(user.Email));
