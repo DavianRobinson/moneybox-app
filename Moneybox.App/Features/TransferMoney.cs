@@ -1,4 +1,5 @@
 ﻿using Moneybox.App.DataAccess;
+using Moneybox.App.Domain;
 using Moneybox.App.Domain.Services;
 using System;
 
@@ -8,11 +9,13 @@ namespace Moneybox.App.Features
     {
         private IAccountRepository accountRepository;
         private INotificationService notificationService;
+        private ITransferMoneyRepository transferMoneyRepository;
 
-        public TransferMoney(IAccountRepository accountRepository, INotificationService notificationService)
+        public TransferMoney(IAccountRepository accountRepository, INotificationService notificationService, ITransferMoneyRepository transferRepository)
         {
             this.accountRepository = accountRepository;
             this.notificationService = notificationService;
+            this.transferMoneyRepository = transferRepository;
         }
 
         public void Execute(Guid fromAccountId, Guid toAccountId, decimal amount)
@@ -26,7 +29,7 @@ namespace Moneybox.App.Features
                 throw new InvalidOperationException("Insufficient funds to make transfer");
             }
 
-            if (fromBalance < 500m)
+            if (fromBalance < Account.FundsLowLimit)
             {
                 this.notificationService.NotifyFundsLow(from.User.Email);
             }
@@ -42,14 +45,13 @@ namespace Moneybox.App.Features
                 this.notificationService.NotifyApproachingPayInLimit(to.User.Email);
             }
 
-            from.Balance = from.Balance - amount;
-            from.Withdrawn = from.Withdrawn - amount;
+            from.Debit(amount);
 
-            to.Balance = to.Balance + amount;
-            to.PaidIn = to.PaidIn + amount;
+            to.Credit(amount);
 
-            this.accountRepository.Update(from);
-            this.accountRepository.Update(to);
+            // transfer money as one transaction DB
+            this.transferMoneyRepository.TransferMoney(from, to);
+
         }
     }
 }

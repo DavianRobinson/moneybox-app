@@ -1,19 +1,61 @@
 ﻿using System;
 
-namespace Moneybox.App
+namespace Moneybox.App.Domain
 {
     public class Account
     {
-        public const decimal PayInLimit = 4000m;
+        private const decimal payInLimit = 4000m;
+        private const decimal fundsLowLimit = 500m;
+        private readonly Guid id;
+        private decimal balance;
+        private decimal withdrawn;
+        private decimal paidIn;
+        private User user;
 
-        public Guid Id { get; set; }
 
-        public User User { get; set; }
 
-        public decimal Balance { get; set; }
+        public Account(User accountUser)
+        {
+            id = Guid.NewGuid();
+            user = accountUser;
+            balance = 0m;
+            paidIn = 0m;
+            withdrawn = 0m;
+        }
 
-        public decimal Withdrawn { get; set; }
+        public Account(Guid accountId, User accountUser)
+        {
+            id = accountId;
+            user = accountUser;
+            balance = 0m;
+            paidIn = 0m;
+            withdrawn = 0m;
+        }
 
-        public decimal PaidIn { get; set; }
+
+
+        public Guid Id => id;
+        public User User { get => user; }
+
+        public decimal Balance { get => balance; }
+
+        public decimal Withdrawn { get => withdrawn; }
+
+        public decimal PaidIn { get => paidIn; }
+
+        public static decimal FundsLowLimit => fundsLowLimit;
+
+        public static decimal PayInLimit => payInLimit;
+
+        public void Debit(decimal amount)
+        {
+            balance = balance - amount;
+            withdrawn = withdrawn - amount;
+        }
+        public void Credit(decimal amount)
+        {
+            balance = balance + amount;
+            paidIn = paidIn + amount;
+        }
     }
 }
