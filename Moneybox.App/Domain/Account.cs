@@ -1,15 +1,17 @@
 ﻿using System;
+using NodaMoney;
 
 namespace Moneybox.App.Domain
 {
     public class Account
     {
-        private const decimal payInLimit = 4000m;
-        private const decimal fundsLowLimit = 500m;
+        private static readonly Money payInLimit = new Money(4000m, Currency.FromCode("GBP"));
+        private static readonly Money fundsLowLimit = new Money(500m, Currency.FromCode("GBP"));
+        private static readonly string defaultCurrencyCode = "GBP";
         private readonly Guid id;
-        private decimal balance;
-        private decimal withdrawn;
-        private decimal paidIn;
+        private Money balance;
+        private Money withdrawn;
+        private Money paidIn;
         private User user;
 
 
@@ -18,18 +20,18 @@ namespace Moneybox.App.Domain
         {
             id = Guid.NewGuid();
             user = accountUser;
-            balance = 0m;
-            paidIn = 0m;
-            withdrawn = 0m;
+            balance = new Money(0m, Currency.FromCode("GBP"));
+            paidIn = new Money(0m, Currency.FromCode("GBP"));
+            withdrawn = new Money(0m, Currency.FromCode("GBP"));
         }
 
         public Account(Guid accountId, User accountUser)
         {
             id = accountId;
             user = accountUser;
-            balance = 0m;
-            paidIn = 0m;
-            withdrawn = 0m;
+            balance = new Money(0m, Currency.FromCode("GBP"));
+            paidIn = new Money(0m, Currency.FromCode("GBP"));
+            withdrawn = new Money(0m, Currency.FromCode("GBP"));
         }
 
 
@@ -37,22 +39,24 @@ namespace Moneybox.App.Domain
         public Guid Id => id;
         public User User { get => user; }
 
-        public decimal Balance { get => balance; }
+        public Money Balance { get => balance; }
 
-        public decimal Withdrawn { get => withdrawn; }
+        public Money Withdrawn { get => withdrawn; }
 
-        public decimal PaidIn { get => paidIn; }
+        public Money PaidIn { get => paidIn; }
 
-        public static decimal FundsLowLimit => fundsLowLimit;
+        public static Money FundsLowLimit => fundsLowLimit;
 
-        public static decimal PayInLimit => payInLimit;
+        public static Money PayInLimit => payInLimit;
 
-        public void Debit(decimal amount)
+        public static string DefaultCurrencyCode => defaultCurrencyCode;
+
+        public void Debit(Money amount)
         {
             balance = balance - amount;
             withdrawn = withdrawn - amount;
         }
-        public void Credit(decimal amount)
+        public void Credit(Money amount)
         {
             balance = balance + amount;
             paidIn = paidIn + amount;
